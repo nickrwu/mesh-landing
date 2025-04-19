@@ -6,7 +6,7 @@ import * as THREE from 'three'
 export function HeroBackground() {
   const containerRef = useRef<HTMLDivElement>(null)
   const meshRef = useRef<THREE.Mesh | null>(null)
-  const frameIdRef = useRef<number>()
+  const frameIdRef = useRef<number>(0)
 
   useEffect(() => {
     const container = containerRef.current
@@ -35,7 +35,9 @@ export function HeroBackground() {
     const size = 200
     const segments = 200
     const geometry = new THREE.PlaneGeometry(size, size, segments, segments)
-    geometry.attributes.position.setUsage(THREE.DynamicDrawUsage)
+    if (geometry.attributes.position instanceof THREE.BufferAttribute) {
+      geometry.attributes.position.usage = THREE.DynamicDrawUsage
+    }
 
     const material = new THREE.MeshBasicMaterial({
       color: 0x7c45f5,

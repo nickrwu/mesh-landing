@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase/supabase"
 import { Button } from "@/components/ui/button"
@@ -12,7 +12,6 @@ import { EyeOpenIcon, EyeClosedIcon, ChevronLeftIcon } from "@radix-ui/react-ico
 
 export default function ResetPasswordPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -98,14 +97,13 @@ export default function ResetPasswordPage() {
           </div>
         </form>
         <div className="text-center">
-          <Button
-            variant="ghost"
+          <Link
+            href="/login"
             className="text-sm"
-            onClick={() => router.push("/login")}
           >
             <ChevronLeftIcon className="mr-2 h-4 w-4" />
             Back to Login
-          </Button>
+          </Link>
         </div>
       </div>
     </AuthLayout>

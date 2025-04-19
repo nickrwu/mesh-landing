@@ -43,6 +43,7 @@ export default function DashboardPage() {
       await supabase.auth.signOut()
       router.push("/login")
     } catch (error) {
+      console.error("Error signing out:", error)
       toast({
         title: "Error",
         description: "Failed to sign out. Please try again.",
@@ -95,7 +96,7 @@ export default function DashboardPage() {
       <main className="flex-1">
         <div className="container mx-auto py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.first_name}</h1>
+            <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.user_metadata.first_name}</h1>
             <p className="text-muted-foreground">Manage your projects and settings</p>
           </div>
           

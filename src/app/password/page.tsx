@@ -133,14 +133,13 @@ export default function PasswordPage() {
           </Button>
         </div>
         <div className="text-center text-sm flex flex-col gap-2">
-          <Button
-              variant="link"
+          <Link
               className="text-sm"
-              onClick={() => router.push(`/login?email=${encodeURIComponent(email)}`)}
+              href={`/login?email=${encodeURIComponent(email)}`}
             >
             <ChevronLeftIcon className="mr-2 h-4 w-4" />
             Back to Login
-          </Button>
+          </Link>
         </div>
       </div>
     </AuthLayout>

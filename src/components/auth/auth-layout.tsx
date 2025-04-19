@@ -25,7 +25,7 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              "Mesh has transformed how we develop games. The AI tools are incredible."
+              &quot;Mesh has transformed how we develop games. The AI tools are incredible.&quot;
             </p>
             <footer className="text-sm">Sarah Chen, Lead Developer</footer>
           </blockquote>
@@ -34,14 +34,14 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
       <div className="lg:p-8">
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center">
-            <div className="flex justify-center mb-4">
+            <Link href="/" className="flex justify-center mb-4">
               <Image
                 src="/assets/icon_outlined.svg"
                 alt="Mesh Logo"
                 width={48}
                 height={48}
               />
-            </div>
+            </Link>
             <h1 className="text-2xl font-semibold tracking-tight">
               {title}
             </h1>
