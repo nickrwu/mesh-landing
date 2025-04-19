@@ -15,13 +15,17 @@ export function LoginForm() {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
-
+  const [error, setError] = useState<string | null>(null)
   const searchParams = useSearchParams()
 
   useEffect(() => {
     const emailParam = searchParams.get("email")
     if (emailParam) {
       setEmail(emailParam)
+    }
+    const errorParam = searchParams.get("error")
+    if (errorParam) {
+      setError(errorParam)
     }
   }, [searchParams])
 
@@ -90,6 +94,11 @@ export function LoginForm() {
                 required
               />
             </div>
+            {error && (
+              <div className="text-sm text-red-500">
+                {error}
+              </div>
+            )}
             <Button type="submit" disabled={loading}>
               <EnvelopeClosedIcon className="mr-2 h-4 w-4" />
               Continue
