@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -11,26 +11,33 @@ import { AuthLayout } from "@/components/auth/auth-layout"
 import { EnvelopeClosedIcon } from "@radix-ui/react-icons"
 import { Github } from "lucide-react"
 
-export default function RegisterPage() {
+export function LoginForm() {
   const router = useRouter()
   const [email, setEmail] = useState("")
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const handleEmailSignUp = async (e: React.FormEvent) => {
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const emailParam = searchParams.get("email")
+    if (emailParam) {
+      setEmail(emailParam)
+    }
+  }, [searchParams])
+
+  const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    try {
-      router.push(`/verify-email?email=${encodeURIComponent(email)}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}`)
+    try {      
+      router.push(`/password?email=${encodeURIComponent(email)}`)
     } catch (error) {
-      console.error("Error signing up:", error)
+      console.error("Error signing in:", error)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleGoogleSignUp = async () => {
+  const handleGoogleSignIn = async () => {
     setLoading(true)
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -41,13 +48,13 @@ export default function RegisterPage() {
       })
       if (error) throw error
     } catch (error) {
-      console.error("Error signing up with Google:", error)
+      console.error("Error signing in with Google:", error)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleGithubSignUp = async () => {
+  const handleGithubSignIn = async () => {
     setLoading(true)
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -58,7 +65,7 @@ export default function RegisterPage() {
       })
       if (error) throw error
     } catch (error) {
-      console.error("Error signing up with GitHub:", error)
+      console.error("Error signing in with GitHub:", error)
     } finally {
       setLoading(false)
     }
@@ -66,34 +73,12 @@ export default function RegisterPage() {
 
   return (
     <AuthLayout
-      title="Create an account"
-      description="Enter your details to get started"
+      title="Welcome back"
+      description="Sign in to your account"
     >
       <div className="grid gap-6">
-        <form onSubmit={handleEmailSignUp}>
+        <form onSubmit={handleEmailSignIn}>
           <div className="grid gap-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="firstName">First name</Label>
-                <Input
-                  id="firstName"
-                  placeholder="John"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="lastName">Last name</Label>
-                <Input
-                  id="lastName"
-                  placeholder="Doe"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -126,7 +111,7 @@ export default function RegisterPage() {
             variant="outline"
             type="button"
             disabled={loading}
-            onClick={handleGoogleSignUp}
+            onClick={handleGoogleSignIn}
           >
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
               <path
@@ -152,7 +137,7 @@ export default function RegisterPage() {
             variant="outline"
             type="button"
             disabled={loading}
-            onClick={handleGithubSignUp}
+            onClick={handleGithubSignIn}
           >
             <Github className="mr-2 h-4 w-4" />
             GitHub
@@ -160,12 +145,12 @@ export default function RegisterPage() {
         </div>
         <div className="text-center text-sm">
           <p className="text-muted-foreground">
-            Already have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
-              href="/login"
+              href="/register"
               className="text-primary hover:underline"
             >
-              Sign in
+              Sign up
             </Link>
           </p>
         </div>
