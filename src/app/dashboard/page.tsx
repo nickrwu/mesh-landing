@@ -108,7 +108,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">No projects yet. Start by creating a new one!</p>
-                <Button className="mt-4 bg-gradient-to-r from-[#7C45F5] to-[#D6C3FF] hover:opacity-90">
+                <Button className="mt-8 w-full">
                   Create Project
                 </Button>
               </CardContent>

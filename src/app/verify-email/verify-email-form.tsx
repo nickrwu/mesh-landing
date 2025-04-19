@@ -94,12 +94,12 @@ export function VerifyEmailForm() {
               </p>
               <p className="text-sm text-muted-foreground">
                 Still can&apos;t find the email?{" "}
-                <Button variant="link" className="p-0 text-primary" asChild>
+                <Button variant="link" className="p-0 text-primary">
                   <Link href="/login">Try signing in again</Link>
                 </Button>
               </p>
             </div>
-            <Button variant="outline" className="w-full" asChild>
+            <Button variant="outline" className="w-full">
               <Link href="/login">Back to Login</Link>
             </Button>
           </div>

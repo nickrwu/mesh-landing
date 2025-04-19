@@ -96,15 +96,13 @@ export default function ResetPasswordPage() {
             </Button>
           </div>
         </form>
-        <div className="text-center">
-          <Link
-            href="/login"
-            className="text-sm"
-          >
-            <ChevronLeftIcon className="mr-2 h-4 w-4" />
-            Back to Login
-          </Link>
-        </div>
+        <Link 
+          className="text-center text-sm flex flex-row justify-center items-center gap-1 hover:underline"
+          href="/login"
+        >
+          <ChevronLeftIcon className="mr-2 h-4 w-4" />
+          Back to Login
+        </Link>
       </div>
     </AuthLayout>
   )

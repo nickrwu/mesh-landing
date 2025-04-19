@@ -74,7 +74,6 @@ export function PasswordForm() {
                   onClick={handleForgotPassword}
                   className="text-xs text-muted-foreground hover:underline p-0 m-0"
                   disabled={loading}
-                  asChild
                 >
                   Forgot your password?
                 </Button>
@@ -126,21 +125,19 @@ export function PasswordForm() {
           <Button
               variant="outline"
               onClick={() => router.push(`/login?email=${encodeURIComponent(email)}`)}
-              className="text-primary hover:underline"
+              className="text-primary"
             >
             <EnvelopeClosedIcon className="mr-2 h-4 w-4" />
             Sign in with a magic link
           </Button>
         </div>
-        <div className="text-center text-sm flex flex-col gap-2">
-          <Link
-              className="text-sm"
-              href={`/login?email=${encodeURIComponent(email)}`}
-            >
-            <ChevronLeftIcon className="mr-2 h-4 w-4" />
-            Back to Login
-          </Link>
-        </div>
+        <Link 
+          className="text-center text-sm flex flex-row justify-center items-center gap-1 hover:underline"
+          href={`/login?email=${encodeURIComponent(email)}`}
+        >
+          <ChevronLeftIcon className="mr-2 h-4 w-4" />
+          Back to Login
+        </Link>
       </div>
     </AuthLayout>
   )
