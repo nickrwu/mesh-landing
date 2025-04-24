@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AuthLayout } from "@/components/auth/auth-layout"
-import { EnvelopeClosedIcon } from "@radix-ui/react-icons"
+import { EnvelopeClosedIcon, LockClosedIcon } from "@radix-ui/react-icons"
 import { Github } from "lucide-react"
 
 export function LoginForm() {
@@ -24,9 +24,32 @@ export function LoginForm() {
       if (!state || !challenge || !redirect) {
         router.push("/login");
       }
-    }, [router]);
+    }, [router, state, challenge, redirect]);
 
-    const handleSignIn = async (provider: string) => {
+    const handleMagicLinkSignIn = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setLoading(true)
+        const u = new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/authorize`)
+
+        u.searchParams.set('response_type',       'code')
+        u.searchParams.set('client_id',           process.env.NEXT_PUBLIC_SUPABASE_PROJECT_REF!)
+        u.searchParams.set('redirect_uri',        redirect!)
+        u.searchParams.set('state',               state!)
+        u.searchParams.set('code_challenge',      challenge!)
+        u.searchParams.set('code_challenge_method','S256')
+        u.searchParams.set('provider',            'email')
+
+        window.location.href = u.toString()
+
+        setLoading(false)
+    }
+
+    const handlePasswordSignIn = () => {
+        if (!email) return
+        router.push(`/auth/desktop/password?email=${encodeURIComponent(email)}&state=${state}&code_challenge=${challenge}&redirect_uri=${encodeURIComponent(redirect || '')}`)
+    }
+
+    const handleSocialSignIn = async (provider: string) => {
         setLoading(true)
         const u = new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/authorize`)
 
@@ -49,7 +72,7 @@ export function LoginForm() {
       description="Sign in to your account"
     >
       <div className="grid gap-6">
-        <form onSubmit={() => handleSignIn("email")}>
+        <form onSubmit={handleMagicLinkSignIn}>
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
@@ -62,10 +85,16 @@ export function LoginForm() {
                 required
               />
             </div>
-            <Button type="submit" disabled={loading}>
-              <EnvelopeClosedIcon className="mr-2 h-4 w-4" />
-              Continue
-            </Button>
+            <div className="flex space-x-2">
+              <Button type="submit" disabled={loading} className="flex-1">
+                <EnvelopeClosedIcon className="mr-2 h-4 w-4" />
+                Magic Link
+              </Button>
+              <Button type="button" disabled={loading || !email} onClick={handlePasswordSignIn} className="flex-1">
+                <LockClosedIcon className="mr-2 h-4 w-4" />
+                Password
+              </Button>
+            </div>
           </div>
         </form>
         <div className="relative">
@@ -83,7 +112,7 @@ export function LoginForm() {
             variant="outline"
             type="button"
             disabled={loading}
-            onClick={() => handleSignIn("google")}
+            onClick={() => handleSocialSignIn("google")}
           >
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
               <path
@@ -109,7 +138,7 @@ export function LoginForm() {
             variant="outline"
             type="button"
             disabled={loading}
-            onClick={() => handleSignIn("github")}
+            onClick={() => handleSocialSignIn("github")}
           >
             <Github className="mr-2 h-4 w-4" />
             GitHub
