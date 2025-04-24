@@ -16,6 +16,8 @@ export function LoginForm() {
     const [email, setEmail] = useState("")
     const [loading, setLoading] = useState(false)
     const searchParams = useSearchParams()
+    const clientId = process.env.NEXT_PUBLIC_SUPABASE_PROJECT_REF!
+    const apikey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     const emailParam = searchParams.get("email")
     const state = searchParams.get('state')
     const challenge = searchParams.get('code_challenge')
@@ -51,7 +53,7 @@ export function LoginForm() {
 
     const handlePasswordSignIn = () => {
         if (!email) return
-        router.push(`/auth/desktop/password?email=${encodeURIComponent(email)}&state=${state}&code_challenge=${challenge}&redirect_uri=${encodeURIComponent(redirect || '')}`)
+        router.push(`/auth/desktop/password?email=${encodeURIComponent(email)}&state=${state}&code_challenge=${challenge}&redirect_uri=${encodeURIComponent(redirect || '')}&apikey=${apikey}&client_id=${clientId}`)
     }
 
     const handleSocialSignIn = async (provider: string) => {
@@ -59,7 +61,8 @@ export function LoginForm() {
         const u = new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/authorize`)
 
         u.searchParams.set('response_type',       'code')
-        u.searchParams.set('client_id',           process.env.NEXT_PUBLIC_SUPABASE_PROJECT_REF!)
+        u.searchParams.set('client_id',           clientId)
+        u.searchParams.set('apikey',              apikey)
         u.searchParams.set('redirect_uri',        redirect!)
         u.searchParams.set('state',               state!)
         u.searchParams.set('code_challenge',      challenge!)

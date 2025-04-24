@@ -16,6 +16,8 @@ export function PasswordForm() {
   const state = searchParams.get('state')
   const challenge = searchParams.get('code_challenge')
   const redirect = searchParams.get('redirect_uri')
+  const clientId = process.env.NEXT_PUBLIC_SUPABASE_PROJECT_REF!
+  const apikey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -36,7 +38,8 @@ export function PasswordForm() {
       const u = new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/token`)
       
       u.searchParams.set('grant_type', 'password')
-      u.searchParams.set('client_id', process.env.NEXT_PUBLIC_SUPABASE_PROJECT_REF!)
+      u.searchParams.set('client_id', clientId)
+      u.searchParams.set('apikey', apikey)
       u.searchParams.set('redirect_uri', redirect!)
       u.searchParams.set('state', state!)
       u.searchParams.set('code_challenge', challenge!)
@@ -87,6 +90,7 @@ export function PasswordForm() {
                   onClick={() => router.push(`/auth/desktop/forgot-password?email=${encodeURIComponent(email)}&state=${state}&code_challenge=${challenge}&redirect_uri=${encodeURIComponent(redirect || '')}`)}
                   className="text-xs text-muted-foreground hover:underline p-0 m-0"
                   disabled={loading}
+                  asChild
                 >
                   Forgot your password?
                 </Button>
@@ -132,7 +136,9 @@ export function PasswordForm() {
               email: email,
               state: state,
               code_challenge: challenge,
-              redirect_uri: redirect
+              redirect_uri: redirect,
+              client_id: clientId,
+              apikey: apikey
             }
           }}
         >
