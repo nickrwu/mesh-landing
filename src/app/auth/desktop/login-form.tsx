@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 // import { supabase } from "@/lib/supabase/client"
@@ -18,12 +18,13 @@ export function LoginForm() {
     const searchParams = useSearchParams()
     const state = searchParams.get('state')
     const challenge = searchParams.get('code_challenge')
-    const redirect = searchParams.get('redirect')        // mesh://auth/callback
+    const redirect = searchParams.get('redirect_uri')        // mesh://auth/callback
         
-    if (!state || !challenge || !redirect) {
-        router.push('/login')
-        return
-    }
+    useEffect(() => {
+      if (!state || !challenge || !redirect) {
+        router.push("/login");
+      }
+    }, [router]);
 
     const handleSignIn = async (provider: string) => {
         setLoading(true)
@@ -31,9 +32,9 @@ export function LoginForm() {
 
         u.searchParams.set('response_type',       'code')
         u.searchParams.set('client_id',           process.env.NEXT_PUBLIC_SUPABASE_PROJECT_REF!)
-        u.searchParams.set('redirect_uri',        redirect)
-        u.searchParams.set('state',               state)
-        u.searchParams.set('code_challenge',      challenge)
+        u.searchParams.set('redirect_uri',        redirect!)
+        u.searchParams.set('state',               state!)
+        u.searchParams.set('code_challenge',      challenge!)
         u.searchParams.set('code_challenge_method','S256')
         u.searchParams.set('provider',            provider)
 
