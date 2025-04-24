@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AuthLayout } from "@/components/auth/auth-layout"
-import { EnvelopeClosedIcon } from "@radix-ui/react-icons"
+import { LockClosedIcon } from "@radix-ui/react-icons"
 import { Github } from "lucide-react"
 
 export function LoginForm() {
@@ -100,7 +100,7 @@ export function LoginForm() {
               </div>
             )}
             <Button type="submit" disabled={loading}>
-              <EnvelopeClosedIcon className="mr-2 h-4 w-4" />
+              <LockClosedIcon className="mr-2 h-4 w-4" />
               Continue
             </Button>
           </div>

@@ -98,7 +98,15 @@ export default function ForgotPassword() {
         )}
         <Link 
           className="text-center text-sm flex flex-row justify-center items-center gap-1 hover:underline"
-          href={`/auth/desktop/login?email=${encodeURIComponent(email)}&state=${state}&code_challenge=${challenge}&redirect_uri=${encodeURIComponent(redirect || '')}`}
+          href={{
+            pathname: "/auth/desktop",
+            query: {
+              email: email,
+              state: state,
+              code_challenge: challenge,
+              redirect_uri: redirect
+            }
+          }}
         >
           <ChevronLeftIcon className="mr-2 h-4 w-4" />
           Back to Login

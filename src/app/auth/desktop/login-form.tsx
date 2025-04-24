@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AuthLayout } from "@/components/auth/auth-layout"
-import { EnvelopeClosedIcon, LockClosedIcon } from "@radix-ui/react-icons"
+import { LockClosedIcon } from "@radix-ui/react-icons"
 import { Github } from "lucide-react"
 
 export function LoginForm() {
@@ -16,6 +16,7 @@ export function LoginForm() {
     const [email, setEmail] = useState("")
     const [loading, setLoading] = useState(false)
     const searchParams = useSearchParams()
+    const emailParam = searchParams.get("email")
     const state = searchParams.get('state')
     const challenge = searchParams.get('code_challenge')
     const redirect = searchParams.get('redirect_uri')        // mesh://auth/callback
@@ -24,9 +25,13 @@ export function LoginForm() {
       if (!state || !challenge || !redirect) {
         router.push("/login");
       }
-    }, [router, state, challenge, redirect]);
 
-    const handleMagicLinkSignIn = async (e: React.FormEvent) => {
+      if (emailParam) {
+        setEmail(emailParam)
+      }
+    }, [router, state, challenge, redirect, emailParam]);
+
+    /* const handleMagicLinkSignIn = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
         const u = new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/authorize`)
@@ -42,7 +47,7 @@ export function LoginForm() {
         window.location.href = u.toString()
 
         setLoading(false)
-    }
+    } */
 
     const handlePasswordSignIn = () => {
         if (!email) return
@@ -72,7 +77,8 @@ export function LoginForm() {
       description="Sign in to your account"
     >
       <div className="grid gap-6">
-        <form onSubmit={handleMagicLinkSignIn}>
+        {/* <form onSubmit={handleMagicLinkSignIn}> */}
+        <form onSubmit={handlePasswordSignIn}>
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
@@ -86,13 +92,13 @@ export function LoginForm() {
               />
             </div>
             <div className="flex space-x-2">
-              <Button type="submit" disabled={loading} className="flex-1">
+              {/* <Button type="submit" disabled={loading} className="flex-1">
                 <EnvelopeClosedIcon className="mr-2 h-4 w-4" />
                 Magic Link
-              </Button>
+              </Button> */}
               <Button type="button" disabled={loading || !email} onClick={handlePasswordSignIn} className="flex-1">
-                <LockClosedIcon className="mr-2 h-4 w-4" />
-                Password
+                  <LockClosedIcon className="mr-2 h-4 w-4" />
+                  Continue
               </Button>
             </div>
           </div>
