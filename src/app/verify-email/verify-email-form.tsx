@@ -54,19 +54,6 @@ export function VerifyEmailForm() {
       })
       if (signUpError) throw signUpError
 
-      // Create user profile in profiles table
-    //   const { error: profileError } = await supabase
-    //     .from('profiles')
-    //     .insert([
-    //       {
-    //         id: data.user?.id,
-    //         first_name: firstName,
-    //         last_name: lastName,
-    //         email: email,
-    //       }
-    //     ])
-    //   if (profileError) throw profileError
-
       setIsSubmitted(true)
     } catch (error) {
       console.error("Error signing up:", error)

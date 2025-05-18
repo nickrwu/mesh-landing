@@ -2,35 +2,129 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { StarIcon, UserIcon } from "lucide-react"
 import Image from "next/image"
 import { HeroBackground } from "@/components/hero-background"
-import { Session } from "@supabase/supabase-js"
+import { Session, User } from "@supabase/supabase-js"
+import { OnboardingModal } from "@/components/auth/onboarding-modal"
+import { useToast } from "@/components/ui/use-toast"
+
+// Define a type for profile data
+interface Profile {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  onboarding_complete: boolean | null;
+}
 
 export default function Home() {
-  const router = useRouter()
+  const { toast } = useToast()
   const waitlistLink = "https://form.typeform.com/to/Dtj9Lc6p"
   const [session, setSession] = useState<Session | null>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [isOnboardingModalOpen, setIsOnboardingModalOpen] = useState(false)
 
   useEffect(() => {
-    const getSession = async () => {
+    const fetchData = async () => {
+      setLoading(true)
       try {
-        const { data: { session } } = await supabase.auth.getSession()
-        setSession(session) 
+        const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession()
+        setSession(currentSession)
+        
+        if (sessionError) {
+          console.error("Error fetching session:", sessionError)
+          toast({ title: "Session Error", description: sessionError.message, variant: "destructive" });
+        }
+
+        if (currentSession?.user) {
+          setUser(currentSession.user)
+          // Fetch profile data if user is logged in
+          const { data: profileData, error: profileError } = await supabase
+            .from("profiles")
+            .select("id, first_name, last_name, onboarding_complete")
+            .eq("id", currentSession.user.id)
+            .single()
+
+          if (profileError && profileError.code !== 'PGRST116') {
+            console.error("Error fetching profile:", profileError)
+            toast({ title: "Profile Error", description: "Could not load your profile.", variant: "destructive" })
+          } else {
+            setProfile(profileData as Profile)
+            if (!profileData || !profileData.onboarding_complete) {
+              setIsOnboardingModalOpen(true)
+            }
+          }
+        } else {
+          setUser(null)
+          setProfile(null)
+        }
       } catch (error) {
-        console.error("Error fetching session:", error)
+        console.error("Error in fetchData:", error)
+        toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" })
+      } finally {
+        setLoading(false)
       }
     }
 
-    getSession()
-  }, [router])
+    fetchData()
+
+    if (user && (!profile || !profile.onboarding_complete)) {
+      // If loading is finished, but modal should be open, ensure it is
+      if (!isOnboardingModalOpen && !loading) setIsOnboardingModalOpen(true);
+    }
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+      setUser(session?.user ?? null)
+      if (session?.user) {
+        fetchData() // Re-fetch data on auth state change to get profile and check onboarding
+      } else {
+        setProfile(null) // Clear profile if user logs out
+        setIsOnboardingModalOpen(false) // Close modal if open
+      }
+    })
+
+    return () => {
+      authListener?.subscription.unsubscribe()
+    }
+  }, [toast])
+  
+  const handleOnboardingComplete = async () => {
+    setIsOnboardingModalOpen(false)
+    setLoading(true)
+    try {
+        if (user) {
+            const { data: profileData, error: profileError } = await supabase
+              .from("profiles")
+              .select("id, first_name, last_name, onboarding_complete")
+              .eq("id", user.id)
+              .single()
+            if (profileError && profileError.code !== 'PGRST116') throw profileError;
+            setProfile(profileData as Profile)
+        }
+    } catch (error) {
+        console.error("Error re-fetching profile after onboarding on home page:", error)
+        toast({ title: "Update", description: "Profile updated.", variant: "default"})
+    } finally {
+        setLoading(false)
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
+      {user && (
+         <OnboardingModal
+            user={user}
+            isOpen={isOnboardingModalOpen}
+            onClose={() => setIsOnboardingModalOpen(false)}
+            onComplete={handleOnboardingComplete}
+          />
+      )}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between">
           <div className="flex items-center">
@@ -69,21 +163,24 @@ export default function Home() {
       </header>
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative overflow-hidden min-h-[80vh]">
+        <section className="relative overflow-hidden min-h-[80vh] flex items-center">
           <div className="absolute inset-0">
             <div className="absolute inset-0 bg-gradient-to-br from-[#7C45F5]/20 to-[#D6C3FF]/20 blur-3xl" />
             <HeroBackground />
           </div>
-          <div className="container mx-auto flex relative space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">
-            <div className="flex max-w-[64rem] flex-col items-center gap-4 text-center mx-auto">
+          <div className="container mx-auto flex flex-col items-center justify-center relative space-y-6 px-4">
+            <div className="flex max-w-[64rem] flex-col items-center gap-4 text-center mx-auto -mt-20">
               <div className="rounded-full bg-[#7C45F5]/10 px-4 py-1.5 text-sm font-medium text-[#7C45F5]">
                 Now in Closed Alpha
               </div>
-              <h1 className="font-heading text-4xl font-bold sm:text-5xl md:text-6xl lg:text-7xl bg-gradient-to-r from-[#7C45F5] to-[#D6C3FF] bg-clip-text text-transparent">
-                The Future of Game Development
+              <h1
+                style={{ WebkitTextFillColor: "transparent" }}
+                className="font-heading inline-block overflow-visible leading-tight text-4xl font-bold sm:text-5xl md:text-6xl lg:text-7xl bg-gradient-to-r from-[#7C45F5] to-[#D6C3FF] bg-clip-text"
+              >
+                The AI Game Engine
               </h1>
               <p className="max-w-[42rem] leading-normal text-white sm:text-xl sm:leading-8">
-                Experience the next generation of game development with AI-powered tools.
+                Game development made easy with AI.
               </p>
               <div className="space-x-4">
                 <Button 

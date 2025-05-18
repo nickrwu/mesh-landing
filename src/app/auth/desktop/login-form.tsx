@@ -3,21 +3,23 @@
 import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-// import { supabase } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AuthLayout } from "@/components/auth/auth-layout"
-import { LockClosedIcon } from "@radix-ui/react-icons"
+import { EnvelopeClosedIcon } from "@radix-ui/react-icons"
 import { Github } from "lucide-react"
+import { supabase } from "@/lib/supabase/client"
+import { Provider } from "@supabase/supabase-js"
 
 export function LoginForm() {
     const router = useRouter()
     const [email, setEmail] = useState("")
     const [loading, setLoading] = useState(false)
+    const [error, setError] = useState("")
     const searchParams = useSearchParams()
-    const clientId = process.env.NEXT_PUBLIC_SUPABASE_PROJECT_REF!
-    const apikey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    // const clientId = process.env.NEXT_PUBLIC_SUPABASE_PROJECT_REF!
+    // const apikey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     const emailParam = searchParams.get("email")
     const state = searchParams.get('state')
     const challenge = searchParams.get('code_challenge')
@@ -33,43 +35,56 @@ export function LoginForm() {
       }
     }, [router, state, challenge, redirect, emailParam]);
 
-    /* const handleMagicLinkSignIn = async (e: React.FormEvent) => {
+    const handleMagicLinkSignIn = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
-        const u = new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/authorize`)
+        try {
+            const { error } = await supabase.auth.signInWithOtp({
+                email,
+                options: {
+                    emailRedirectTo: redirect!
+                }
+            })
+            if (error) throw error
+            router.push("/verify-email")
+        } catch (error) {
+            console.error("Error sending magic link:", error)
+            setError("Failed to send magic link. Please try again.")
+        } finally {
+            setLoading(false)
+        }
 
-        u.searchParams.set('response_type',       'code')
-        u.searchParams.set('client_id',           process.env.NEXT_PUBLIC_SUPABASE_PROJECT_REF!)
-        u.searchParams.set('redirect_uri',        redirect!)
-        u.searchParams.set('state',               state!)
-        u.searchParams.set('code_challenge',      challenge!)
-        u.searchParams.set('code_challenge_method','S256')
-        u.searchParams.set('provider',            'email')
+        // const u = new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/authorize`)
 
-        window.location.href = u.toString()
+        // u.searchParams.set('response_type',       'code')
+        // u.searchParams.set('client_id',           process.env.NEXT_PUBLIC_SUPABASE_PROJECT_REF!)
+        // u.searchParams.set('redirect_uri',        redirect!)
+        // u.searchParams.set('state',               state!)
+        // u.searchParams.set('code_challenge',      challenge!)
+        // u.searchParams.set('code_challenge_method','S256')
+        // u.searchParams.set('provider',            'email')
+
+        // window.location.href = u.toString()
 
         setLoading(false)
-    } */
-
-    const handlePasswordSignIn = () => {
-        if (!email) return
-        router.push(`/auth/desktop/password?email=${encodeURIComponent(email)}&state=${state}&code_challenge=${challenge}&redirect_uri=${encodeURIComponent(redirect || '')}&apikey=${apikey}&client_id=${clientId}`)
     }
 
     const handleSocialSignIn = async (provider: string) => {
         setLoading(true)
-        const u = new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/authorize`)
-
-        u.searchParams.set('response_type',       'code')
-        u.searchParams.set('client_id',           clientId)
-        u.searchParams.set('apikey',              apikey)
-        u.searchParams.set('redirect_uri',        redirect!)
-        u.searchParams.set('state',               state!)
-        u.searchParams.set('code_challenge',      challenge!)
-        u.searchParams.set('code_challenge_method','S256')
-        u.searchParams.set('provider',            provider)
-
-        window.location.href = u.toString()
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+              provider: provider as Provider,
+              options: {
+                  redirectTo: redirect!
+              }
+            })
+            if (error) throw error
+        } catch (error) {
+            console.error("Error signing in:", error)
+            setError("Failed to sign in. Please try again.")
+        } finally {
+            setLoading(false)
+        }
 
         setLoading(false)
     }
@@ -80,8 +95,7 @@ export function LoginForm() {
       description="Sign in to your account"
     >
       <div className="grid gap-6">
-        {/* <form onSubmit={handleMagicLinkSignIn}> */}
-        <form onSubmit={handlePasswordSignIn}>
+        <form onSubmit={handleMagicLinkSignIn}>
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
@@ -94,14 +108,15 @@ export function LoginForm() {
                 required
               />
             </div>
+            {error && (
+              <div className="text-sm text-red-500">
+                {error}
+              </div>
+            )}
             <div className="flex space-x-2">
-              {/* <Button type="submit" disabled={loading} className="flex-1">
+              <Button type="submit" disabled={loading} className="flex-1">
                 <EnvelopeClosedIcon className="mr-2 h-4 w-4" />
                 Magic Link
-              </Button> */}
-              <Button type="button" disabled={loading || !email} onClick={handlePasswordSignIn} className="flex-1">
-                  <LockClosedIcon className="mr-2 h-4 w-4" />
-                  Continue
               </Button>
             </div>
           </div>

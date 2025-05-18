@@ -20,4 +20,12 @@ export async function GET(request: NextRequest) {
 
   // If no email or we're already at the right place, just continue
   return NextResponse.next()
+}
+
+export async function POST(request: NextRequest) {
+  // Redirect user to the success page
+  const redirectUrl = request.nextUrl.clone()
+  redirectUrl.pathname = '/auth/desktop/success' // Point to the new success page
+  redirectUrl.search = '' // Clear query parameters
+  return NextResponse.redirect(redirectUrl)
 } 

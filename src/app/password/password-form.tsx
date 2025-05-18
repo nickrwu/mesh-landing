@@ -37,6 +37,23 @@ export function PasswordForm() {
       setLoading(false)
     }
   }
+  
+  const handleMagicLinkSignIn = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email
+      })
+      if (error) throw error
+      router.push("/dashboard")
+    } catch (error) {
+      console.error("Error sending magic link:", error)
+      setError("Failed to send magic link. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleForgotPassword = async () => {
     setLoading(true)
@@ -124,7 +141,7 @@ export function PasswordForm() {
         <div className="grid gap-4">
           <Button
               variant="outline"
-              onClick={() => router.push(`/login?email=${encodeURIComponent(email)}`)}
+              onClick={handleMagicLinkSignIn}
               className="text-primary"
             >
             <EnvelopeClosedIcon className="mr-2 h-4 w-4" />
